@@ -1,6 +1,5 @@
 // Función para manejar la visibilidad de la descripción
 function toggleDescription(element) {
-  //console.log('soukronfpv - toggleDescription');
   const description = element.querySelector('.description-content');
   const toggleLink = element.querySelector('.toggle-description');
 
@@ -137,17 +136,12 @@ function parseAndConvertDates(text) {
   const match = text.match(regex);
 
   if (match) {
-    //console.log('soukronfpv - Encontradas fechas en el texto.');
-
     const fromDateUTC = match[1];
     const toDateUTC = match[2];
 
     // Convertir las fechas a la zona horaria de España
     const fromDateLocal = convertUTCToLocal(fromDateUTC);
     const toDateLocal = convertUTCToLocal(toDateUTC);
-
-    //console.log(`soukronfpv - Fecha DESDE (UTC): ${fromDateUTC} -> Fecha DESDE (Local): ${fromDateLocal}`);
-    //console.log(`soukronfpv - Fecha HASTA (UTC): ${toDateUTC} -> Fecha HASTA (Local): ${toDateLocal}`);
 
     // Reemplazar las fechas en el texto con las versiones locales y en cursiva, y añadir tooltips
     const updatedText = text.replace(regex, `
@@ -167,7 +161,6 @@ function parseAndConvertDates(text) {
 
     return updatedText;
   } else {
-    //console.log('soukronfpv - No se encontraron fechas en el texto.');
     return text;
   }
 }
@@ -180,7 +173,7 @@ function addRestrictionNotice(text) {
   // Agregar una línea de aviso si el texto contiene frases específicas
   const updatedText = text.replace(/(<b>DESCRIPCIÓN:<\/b>)/i, (match) => {
     if (restrictionTextRegex.test(text)) {
-      return `<b>IMPORTANTE:</b> <span style="color: #dc143c;">Este NOTAM NO permite el vuelo sin coordinación.</span><br>${match}`;
+      return `<b>IMPORTANTE:</b> <span style="color: #dc143c;">Este NOTAM PROHIBE el vuelo sin coordinación.</span><br>${match}`;
     }
     return match;
   });
@@ -231,7 +224,6 @@ function addDetectedClass() {
   if (elements.length === 0) {
   }
   elements.forEach(element => {
-    //console.log('soukronfpv - Elemento encontrado:', element);
     if (!element.classList.contains('detected')) {
       element.classList.add('detected');
 
@@ -259,7 +251,6 @@ function addDetectedClass() {
 const observer = new MutationObserver(function (mutationsList) {
   for (let mutation of mutationsList) {
     if (mutation.type === 'childList' || mutation.type === 'subtree') {
-      //console.log('soukronfpv - Cambio en el DOM:', mutation);
       // Llama a la función cada vez que haya un cambio en el DOM
       addDetectedClass();
     }
@@ -275,7 +266,6 @@ observer.observe(document.body, config);
 
 // También ejecuta la función al cargar la página
 document.addEventListener('DOMContentLoaded', function () {
-  //console.log('soukronfpv - DOM completamente cargado.');
   addDetectedClass();
 });
 
