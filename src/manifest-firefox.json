@@ -1,6 +1,6 @@
 {
   "manifest_version": 2,
-  "name": "Drones Enaire Helper",
+  "name": "ENAIRE Drones Extension",
   "version": "1.1",
   "author": "Sergio Garcia (soukron@gmbros.net)",
   "description": "Extensión NO OFICIAL para simplificar la lectura en drones.enaire.es.",
