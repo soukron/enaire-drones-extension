@@ -1,4 +1,4 @@
-# ![icon of an drone](mozilla-firefox/icons/icon-48.png) ENAIRE Drones Extension
+# ![icon of an drone](src/icons/icon-48.png) ENAIRE Drones Extension
 
 ## Descripcion
 Esta extension para tu navegador pretende ayudar a la lectura de algunas de las informaciones presentadas en la web ENAIRE Drones ya que pueden resultar confusas para usuarios no acostumbrados a la nomenclatura aeronáutica.
@@ -10,33 +10,51 @@ Por ahora:
 - extrae de la descripción la informacion de si el espacio está segregado/restringido y lo muestra de una manera más clara
 - oculta la descripción por defecto
 
+En un futuro, quizá:
+- oculte NOTAMS y demás informaciones que no afecten a los drones
+- enlace con el formulario del Ministerio del Interior para aquellas zonas que requieran la comunicación
+- traduzca los horarios de los NOTAM
+
 ## Instalación
 ### Firefox
 Accede a la [web de la extensión en Mozilla](https://addons.mozilla.org/en-US/firefox/addon/enaire-drones-extension/) e instalala desde ahí.
 
 ### Chrome
-Version en desarrollo. Pendiente de publicar.
+Version pendiente de revisión por parte de Google.
 
-## Instalación manual
-No es recomendado instalar la extension de esta manera puesto que no hay actualizaciones automáticas, pero si quieres hacer pruebas con ella, puedes hacer lo siguiente:
+## Desarrollo
+Usa `make` para construir y empaquetar la extensión y poder probarla localmente.
 
-### Firefox
-- Descarga el repositorio y descomprimelo
-- Abre en tu navegador la dirección `about:debugging`
-- Haz click en `This Firefox` en el menú lateral
-- Haz click en `Load Temporary Add-On...`
-- Navega hasta el directorio donde hayas descomprimido el código y selecciona el fichero `manifest.json`
+Revisa la lista siguiente para ver los posibles targes de `make` (revisa el Makefile para obtener más detalles).
 
-### Chrome
-- Descarga el repositorio y descomprimelo
-- Abre en tu navegador la dirección `chrome://extensions/`
-- Activa el `Developer mode` en la esquina superior derecha
-- Haz clic en `Load unpacked`
-- Selecciona la carpeta que contiene los archivos de tu extensión
+| Comando              | Descripcion                                                                             |
+| -------------------- | --------------------------------------------------------------------------------------- |
+| `make` or `make all` | Prepara el código fuente y prepara las extensiones sin empaquetar para los navegadores  |
+| `make extension`     | Prepara el código fuente                                                                |
+| `make chromium`      | Prepara el código fuente y prepara la extensión sin empaquetar para Chromium            |
+| `make firefox`       | Prepara el código fuente y prepara la extensión sin empaquetar para Firefox             |
 
-Para otros navegadores basados en Chromium (Edge, Brave, Opera, etc.) el proceso es muy similar. Busca la página de gestión de extensiones y una opción para cargar extensiones descomprimidas o en modo desarrollador.
+### Cargar una extensión localmente
+-   En Chromium:
+    -   Ve a la dirección `chrome://extensions`
+    -   Activa `Developer mode` en la esquina superior derecha
+    -   Haz click en `Load unpacked extension`
+    -   Selecciona el directorio `enaire-drones-extension/chromium`
+-   En Firefox:
+    -   Ve a la dirección `about:debugging#addons`
+    -   Haz click en `Load temporary add-on`
+    -   Selecciona el directorio `enaire-drones-extension/firefox`
+
+## Contribuciones
+1. Crea un fork [del repositorio](https://github.com/soukron/enaire-drones-extension)
+2. Create una rama de feature
+    - `git checkout -b my-new-feature`
+3. Guarda tus cambios
+    - `git commit -am 'Add some feature'`
+4. Sube los cambios
+    - `git push origin my-new-feature`
+5. Crea una nueva pull request
 
 ## Contacto
-
 - Sergio G. (soukron_at_gmbros.net)
 - Telegram: https://t.me/soukron
