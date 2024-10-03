@@ -1,7 +1,13 @@
 VERSION ?= $(shell cat .version)
+VERSION_NUMBER := $(shell echo $(VERSION) | sed 's/^v//')
 
 CLEAN_FILES := chromium firefox dist dist-webstore
 CHROME := $(shell which chromium 2>/dev/null || which chromium-browser 2>/dev/null || which chrome 2>/dev/null || which google-chrome 2>/dev/null || which google-chrome-stable 2>/dev/null || which "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" 2>/dev/null)
+ifneq (,$(findstring MacOS,$(CHROME)))
+    SED_INPLACE := sed -i ''
+else
+    SED_INPLACE := sed -i
+endif
 
 #######################
 # For local development
@@ -31,6 +37,7 @@ $(CHROMIUM_FILES) : chromium/% : src/%
 chromium/manifest.json : src/manifest-chromium.json
 	[ -d $(dir $@) ] || mkdir -p $(dir $@)
 	cp $< $@
+	$(SED_INPLACE) 's/"version": "[^"]*"/"version": "$(VERSION_NUMBER)"/' $@
 
 .PHONY: firefox
 firefox: extension $(FIREFOX_FILES) firefox/manifest.json
@@ -42,6 +49,7 @@ $(FIREFOX_FILES) : firefox/% : src/%
 firefox/manifest.json : src/manifest-firefox.json
 	[ -d $(dir $@) ] || mkdir -p $(dir $@)
 	cp $< $@
+	$(SED_INPLACE) 's/"version": "[^"]*"/"version": "$(VERSION_NUMBER)"/' $@
 
 #######################
 # For official releases
@@ -52,15 +60,7 @@ clean:
 #	$(MAKE) -C src clean
 
 .PHONY: dist
-dist: clean extension chromium firefox
+dist: clean extension chromium firefox	
 	mkdir -p dist
-
-	git -c tar.tar.gz.command="gzip -cn" archive -o dist/drones-enaire-extension-$(VERSION).tar.gz --format tar.gz --prefix=drones-enaire-extension-$(VERSION)/ $(VERSION)
-
 	(cd chromium && zip -r ../dist/drones-enaire-chromium-$(VERSION).zip *)
-	(cd firefox  && zip -r ../dist/drones-enaire-firefox-$(VERSION).zip  *)
-
-	mkdir -p dist-webstore
-
-	cp dist/drones-enaire-firefox-$(VERSION).zip dist-webstore/firefox-$(VERSION).zip
-	mv dist/drones-enaire-extension-$(VERSION).tar.gz dist-webstore/firefox-$(VERSION)-src.tar.gz
+	(cd firefox  && zip -r ../dist/drones-enaire-firefox-$(VERSION).zip *)
