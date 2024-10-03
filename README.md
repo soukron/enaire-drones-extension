@@ -1,4 +1,4 @@
-# ![icon of an drone](icons/icon-48.png) ENAIRE Drones Extension
+# ![icon of an drone](mozilla-firefox/icons/icon-48.png) ENAIRE Drones Extension
 
 ## Descripcion
 Esta extension para tu navegador pretende ayudar a la lectura de algunas de las informaciones presentadas en la web ENAIRE Drones ya que pueden resultar confusas para usuarios no acostumbrados a la nomenclatura aeronáutica.
@@ -22,14 +22,14 @@ No es recomendado instalar la extension de esta manera puesto que no hay actuali
 
 ### Firefox
 - Descarga el repositorio y descomprimelo
-- Abre en tu navegador la dirección about:debugging
+- Abre en tu navegador la dirección `about:debugging`
 - Haz click en `This Firefox` en el menú lateral
 - Haz click en `Load Temporary Add-On...`
 - Navega hasta el directorio donde hayas descomprimido el código y selecciona el fichero `manifest.json`
 
 ### Chrome
 - Descarga el repositorio y descomprimelo
-- Abre en tu navegador la dirección chrome://extensions/
+- Abre en tu navegador la dirección `chrome://extensions/`
 - Activa el `Developer mode` en la esquina superior derecha
 - Haz clic en `Load unpacked`
 - Selecciona la carpeta que contiene los archivos de tu extensión
