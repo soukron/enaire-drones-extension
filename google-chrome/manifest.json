@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "Drones Enaire Helper",
+  "version": "1.0",
+  "author": "Sergio Garcia (soukron@gmbros.net)",
+  "description": "Extensión NO OFICIAL para simplificar la lectura en drones.enaire.es.",
+  "permissions": ["activeTab"],
+  "content_scripts": [
+    {
+      "matches": ["https://drones.enaire.es/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "action": {
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
+  }
+}
