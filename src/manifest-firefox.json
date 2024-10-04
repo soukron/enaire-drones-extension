@@ -5,7 +5,7 @@
   "author": "Sergio Garcia (soukron@gmbros.net)",
   "description": "Extensión NO OFICIAL para simplificar la lectura en drones.enaire.es.",
   "homepage_url": "https://github.com/soukron/enaire-drones-extension",
-  "permissions": ["activeTab"],
+  "permissions": [],
   "content_scripts": [
     {
       "matches": ["https://drones.enaire.es/*"],
