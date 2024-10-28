@@ -1,11 +1,13 @@
 {
   "manifest_version": 2,
   "name": "ENAIRE Drones Extension",
-  "version": "",
+  "version": "1.2",
   "author": "Sergio Garcia (soukron@gmbros.net)",
   "description": "Extensión NO OFICIAL para simplificar la lectura en drones.enaire.es.",
   "homepage_url": "https://github.com/soukron/enaire-drones-extension",
-  "permissions": [],
+  "permissions": [
+    "https://api.open-elevation.com/*"
+  ],
   "content_scripts": [
     {
       "matches": ["https://drones.enaire.es/*"],

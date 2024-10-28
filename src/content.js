@@ -1,3 +1,97 @@
+async function processPuntoVuelo() {
+  const xpath = "//div[@class='campo'][contains(text(),'Información sobre punto de vuelo: ')]";
+  const campoDiv = document.evaluate(
+    xpath,
+    document,
+    null,
+    XPathResult.FIRST_ORDERED_NODE_TYPE,
+    null
+  ).singleNodeValue;
+
+  if (campoDiv) {
+    const valorDiv = campoDiv.nextElementSibling;
+
+    if (valorDiv && valorDiv.classList.contains('valor')) {
+      const contenido = valorDiv.textContent;
+      console.log('soukronfpv - Contenido encontrado:', contenido);
+
+      // Parsear las coordenadas en formato DDMMSS.SSSSSSN DDDMMSS.SSSSSSW
+      const coordRegex = /(\d{2})(\d{2})(\d{2}\.\d{6})([NS])\s*(\d{3})(\d{2})(\d{2}\.\d{6})([EW])/;
+      const match = contenido.match(coordRegex);
+
+      if (match) {
+        // Extraer componentes
+        const latDeg = parseInt(match[1]);
+        const latMin = parseInt(match[2]);
+        const latSec = parseFloat(match[3]);
+        const latDir = match[4];
+
+        const lonDeg = parseInt(match[5]);
+        const lonMin = parseInt(match[6]);
+        const lonSec = parseFloat(match[7]);
+        const lonDir = match[8];
+
+        // Convertir a decimal
+        const lat = parseCoordToDecimal(latDeg, latMin, latSec, latDir);
+        const lon = parseCoordToDecimal(lonDeg, lonMin, lonSec, lonDir);
+
+        console.log(`soukronfpv - Coordenadas convertidas: ${lat}, ${lon}`);
+
+        try {
+          const elevation = await getElevation(lat, lon);
+          console.log(`soukronfpv - Elevación en el punto (${lat}, ${lon}): ${elevation} metros`);
+
+          // Mostrar las coordenadas originales y la elevación
+          valorDiv.innerHTML = `${contenido}<br>Elevación: ${elevation} metros`;
+        } catch (error) {
+          console.error('soukronfpv - Error al obtener la elevación:', error);
+          valorDiv.innerHTML = `${contenido}`;
+        }
+      } else {
+        console.log('soukronfpv - No se pudieron parsear las coordenadas:', contenido);
+        valorDiv.innerHTML = `${contenido}`;
+      }
+
+      return contenido;
+    }
+  }
+
+  return null;
+}
+
+// Función auxiliar para convertir coordenadas a decimal
+function parseCoordToDecimal(degrees, minutes, seconds, direction) {
+  let decimal = degrees + (minutes / 60) + (seconds / 3600);
+
+  if (direction === 'S' || direction === 'W') {
+    decimal = -decimal;
+  }
+
+  return decimal.toFixed(6);
+}
+
+// Función para obtener la elevación
+async function getElevation(lat, lon) {
+  const url = `https://api.open-elevation.com/api/v1/lookup?locations=${lat},${lon}`;
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+
+    if (data.results && data.results[0]) {
+      return data.results[0].elevation;
+    } else {
+      throw new Error('No elevation data in response');
+    }
+  } catch (error) {
+    console.error('Error fetching elevation:', error);
+    throw error;
+  }
+}
+
 // Función para manejar la visibilidad de la descripción
 function toggleDescription(element) {
   const description = element.querySelector(".description-content");
@@ -236,6 +330,8 @@ function processNotamContent(text) {
 
 // Función que agrega la clase 'detected' al div con class 'mensajeDrones NOTAM'
 function addDetectedClass() {
+  processPuntoVuelo();
+
   const elements = document.querySelectorAll("div.mensajeDrones.NOTAM");
   if (elements.length === 0) {
   }
@@ -264,11 +360,13 @@ function addDetectedClass() {
 }
 
 // Configura un observador para monitorizar cambios en el DOM
-const observer = new MutationObserver(function (mutationsList) {
-  for (let mutation of mutationsList) {
-    if (mutation.type === "childList" || mutation.type === "subtree") {
-      // Llama a la función cada vez que haya un cambio en el DOM
+const observer = new MutationObserver(function(mutationsList) {
+  for (const mutation of mutationsList) {
+    if ((mutation.type === 'childList' || mutation.type === 'subtree') && 
+        mutation.target.id === 'popupContent') {
+      console.log('soukronfpv - Detectado cambio en popupContent');
       addDetectedClass();
+      break; // Salimos del loop ya que solo necesitamos procesar una vez
     }
   }
 });
@@ -277,14 +375,18 @@ const observer = new MutationObserver(function (mutationsList) {
 const config = { childList: true, subtree: true };
 
 // Inicia el observador en el documento completo
-console.log(
-  "soukronfpv - Iniciando el observador en el cuerpo del documento...",
-);
+console.log("soukronfpv - Iniciando el observador en el cuerpo del documento...");
 observer.observe(document.body, config);
 
 // También ejecuta la función al cargar la página
-document.addEventListener("DOMContentLoaded", function () {
-  addDetectedClass();
+// Inicia el observador en el documento
+document.addEventListener('DOMContentLoaded', function() {
+  const popupContent = document.getElementById('popupContent');
+  if (popupContent) {
+    observer.observe(popupContent, config);
+    console.log('soukronfpv - Observer iniciado en popupContent');
+    addDetectedClass();
+  }
 });
 
 // Agregar estilos para el tooltip
