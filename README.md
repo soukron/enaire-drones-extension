@@ -17,10 +17,10 @@ En un futuro, quizá:
 
 ## Instalación
 ### Firefox
-Accede a la [web de la extensión en Mozilla](https://addons.mozilla.org/en-US/firefox/addon/enaire-drones-extension/) e instalala desde ahí.
+Accede a la [web de la extensión en Mozilla](https://addons.mozilla.org/en-US/firefox/addon/enaire-drones-extension/) e instálala desde ahí.
 
 ### Chrome
-Version pendiente de revisión por parte de Google.
+Accede a la [web de la extensión en Chrome Web Store](https://chromewebstore.google.com/detail/enaire-drones-extension/ideoickpjgfkkdcmjlknlcickcmifhck?authuser=0&hl=es) e instálala desde ahí.
 
 ## Desarrollo
 Usa `make` para construir y empaquetar la extensión y poder probarla localmente.
