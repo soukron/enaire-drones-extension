@@ -330,11 +330,7 @@ function processNotamContent(text) {
 
 // Función que agrega la clase 'detected' al div con class 'mensajeDrones NOTAM'
 function addDetectedClass() {
-  processPuntoVuelo();
-
   const elements = document.querySelectorAll("div.mensajeDrones.NOTAM");
-  if (elements.length === 0) {
-  }
   elements.forEach((element) => {
     if (!element.classList.contains("detected")) {
       element.classList.add("detected");
@@ -359,35 +355,32 @@ function addDetectedClass() {
   });
 }
 
-// Configura un observador para monitorizar cambios en el DOM
-const observer = new MutationObserver(function(mutationsList) {
-  for (const mutation of mutationsList) {
-    if ((mutation.type === 'childList' || mutation.type === 'subtree') && 
-        mutation.target.id === 'popupContent') {
-      console.log('soukronfpv - Detectado cambio en popupContent');
-      addDetectedClass();
-      break; // Salimos del loop ya que solo necesitamos procesar una vez
-    }
-  }
-});
-
-// Opciones para el observador (monitoriza elementos hijos y el subárbol)
-const config = { childList: true, subtree: true };
-
-// Inicia el observador en el documento completo
-console.log("soukronfpv - Iniciando el observador en el cuerpo del documento...");
-observer.observe(document.body, config);
-
-// También ejecuta la función al cargar la página
-// Inicia el observador en el documento
-document.addEventListener('DOMContentLoaded', function() {
-  const popupContent = document.getElementById('popupContent');
-  if (popupContent) {
-    observer.observe(popupContent, config);
-    console.log('soukronfpv - Observer iniciado en popupContent');
+// Función para procesar clicks en el mapa
+function handleMapClick() {
+  // Esperamos a que las llamadas AJAX terminen
+  setTimeout(() => {
     addDetectedClass();
+  }, 1000);
+}
+
+// Función para inicializar el monitor del mapa
+function initMapMonitor() {
+  const map = document.querySelector('.map');
+  console.log('soukronfpv - Buscando elemento mapa...', map);
+  
+  if (map) {
+    map.addEventListener('click', handleMapClick);
+    console.log('soukronfpv - Monitor de clicks en mapa iniciado');
+  } else {
+    console.log('soukronfpv - No se encontró el elemento mapa');
   }
-});
+}
+
+// Intentar inicializar cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', initMapMonitor);
+
+// También intentar inicializar cuando la página esté completamente cargada
+window.addEventListener('load', initMapMonitor);
 
 // Agregar estilos para el tooltip
 const style = document.createElement("style");
