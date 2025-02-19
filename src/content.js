@@ -282,56 +282,47 @@ async function processCoordinates() {
 
   const calcTimeDiv = document.querySelector('.calcTime');  
   if (calcTimeDiv) {
-    const contenido = lastClickedCoordinates;
-    console.log('soukronfpv - Procesando coordenadas guardadas:', contenido);
-    
-    // Parsear las coordenadas en formato DD°MM′SS.SSS″N/S DDD°MM′SS.SSS″E/W
-    const coordRegex = /(\d+)°(\d+)′(\d+\.\d+)″([NS])\s*(\d+)°(\d+)′(\d+\.\d+)″([EW])/;
-    const match = contenido.match(coordRegex);
+    // Solo procesar si no hay coordenadas ya mostradas
+    if (!calcTimeDiv.textContent.includes('Coordenadas:')) {
+      const contenido = lastClickedCoordinates;
+      console.log('soukronfpv - Procesando coordenadas guardadas:', contenido);
+      
+      // Parsear las coordenadas en formato DD°MM′SS.SSS″N/S DDD°MM′SS.SSS″E/W
+      const coordRegex = /(\d+)°(\d+)′(\d+\.\d+)″([NS])\s*(\d+)°(\d+)′(\d+\.\d+)″([EW])/;
+      const match = contenido.match(coordRegex);
 
-    if (match) {
-      // Extraer componentes
-      const latDeg = parseInt(match[1]);
-      const latMin = parseInt(match[2]);
-      const latSec = parseFloat(match[3]);
-      const latDir = match[4];
+      if (match) {
+        // Extraer componentes
+        const latDeg = parseInt(match[1]);
+        const latMin = parseInt(match[2]);
+        const latSec = parseFloat(match[3]);
+        const latDir = match[4];
 
-      const lonDeg = parseInt(match[5]);
-      const lonMin = parseInt(match[6]);
-      const lonSec = parseFloat(match[7]);
-      const lonDir = match[8];
+        const lonDeg = parseInt(match[5]);
+        const lonMin = parseInt(match[6]);
+        const lonSec = parseFloat(match[7]);
+        const lonDir = match[8];
 
-      // Convertir a decimal
-      const lat = parseCoordToDecimal(latDeg, latMin, latSec, latDir);
-      const lon = parseCoordToDecimal(lonDeg, lonMin, lonSec, lonDir);
+        // Convertir a decimal
+        const lat = parseCoordToDecimal(latDeg, latMin, latSec, latDir);
+        const lon = parseCoordToDecimal(lonDeg, lonMin, lonSec, lonDir);
 
-      console.log(`soukronfpv - Coordenadas convertidas: ${lat}, ${lon}`);
+        console.log(`soukronfpv - Coordenadas convertidas: ${lat}, ${lon}`);
 
-      try {
-        const elevation = await getElevation(lat, lon);
-        console.log(`soukronfpv - Elevación en el punto (${lat}, ${lon}): ${elevation} metros`);
-
-        // Actualizar el texto con coordenadas y elevación en líneas separadas
-        const originalText = calcTimeDiv.textContent;
-        if (!originalText.includes('Coordenadas:')) {
-          calcTimeDiv.innerHTML = `${originalText}<br>Coordenadas: ${contenido}<br>Elevación: ${elevation} metros`;
+        try {
+          const elevation = await getElevation(lat, lon);
+          console.log(`soukronfpv - Elevación en el punto (${lat}, ${lon}): ${elevation} metros`);
+          calcTimeDiv.innerHTML = `${calcTimeDiv.textContent}<br>Coordenadas: ${contenido}<br>Elevación: ${elevation} metros`;
+        } catch (error) {
+          console.error('soukronfpv - Error al obtener la elevación:', error);
+          calcTimeDiv.innerHTML = `${calcTimeDiv.textContent}<br>Coordenadas: ${contenido}`;
         }
-
-      } catch (error) {
-        console.error('soukronfpv - Error al obtener la elevación:', error);
-        // Si falla la elevación, mostrar solo las coordenadas
-        const originalText = calcTimeDiv.textContent;
-        if (!originalText.includes('Coordenadas:')) {
-          calcTimeDiv.innerHTML = `${originalText}<br>Coordenadas: ${contenido}`;
-        }
+      } else {
+        console.log('soukronfpv - No se pudieron parsear las coordenadas:', contenido);
+        calcTimeDiv.innerHTML = `${calcTimeDiv.textContent}<br>Coordenadas: ${contenido}`;
       }
     } else {
-      console.log('soukronfpv - No se pudieron parsear las coordenadas:', contenido);
-      // Si no se pueden parsear, mostrar las coordenadas tal cual
-      const originalText = calcTimeDiv.textContent;
-      if (!originalText.includes('Coordenadas:')) {
-        calcTimeDiv.innerHTML = `${originalText}<br>Coordenadas: ${contenido}`;
-      }
+      console.log('soukronfpv - El div ya contiene coordenadas, saltando procesamiento');
     }
   }
 }
