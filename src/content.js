@@ -343,9 +343,9 @@ async function loadAirportsData() {
 
 // Función para procesar el contenido de las alertas
 async function processAlertContent(text) {
-  // Expresión regular para capturar la altura en metros y el aeródromo
+  // Expresión regular para capturar la altura en metros y el código del aeródromo
   const heightRegex = /Por debajo de (\d+)m medidos desde el punto de referencia del /;
-  const airportRegex = /operacional de (?:<elem>)([A-Z]+)\s*(?:<.elem>)\s*,\s*([A-Z]+)/;
+  const airportRegex = /,\s*([A-Z]{4})/;
   
   // Primero limpiamos el texto de tags HTML para el log
   const cleanText = text.replace(/<[^>]*>/g, '');
@@ -355,12 +355,10 @@ async function processAlertContent(text) {
 
   if (heightMatch && airportMatch) {
     arpHeight = parseInt(heightMatch[1], 10);
-    const airportName = airportMatch[1];
-    const airportCode = airportMatch[2];
+    const airportCode = airportMatch[1];
     
     console.log('soukronfpv - Datos capturados:', {
       altura: arpHeight,
-      aeropuerto: airportName,
       codigo: airportCode
     });
 
@@ -398,7 +396,7 @@ async function processAlertContent(text) {
     }
   }
 
-  return "<b>ALERTA:</b>&nbsp;" + text + "<br><i>Alerta procesada por soukronfpv</i>";
+  return text;
 }
 
 // Función que agrega la clase 'detected' a los divs de NOTAM y ALERTA
