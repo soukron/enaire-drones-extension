@@ -1,66 +1,8 @@
 // Variable global para almacenar las coordenadas del último click
 let lastClickedCoordinates = null;
 
-async function processPuntoVuelo() {
-  const xpath = "//div[@class='campo'][contains(text(),'Información sobre punto de vuelo: ')]";
-  const campoDiv = document.evaluate(
-    xpath,
-    document,
-    null,
-    XPathResult.FIRST_ORDERED_NODE_TYPE,
-    null
-  ).singleNodeValue;
-
-  if (campoDiv) {
-    const valorDiv = campoDiv.nextElementSibling;
-
-    if (valorDiv && valorDiv.classList.contains('valor')) {
-      const contenido = valorDiv.textContent;
-      console.log('soukronfpv - Contenido encontrado:', contenido);
-
-      // Parsear las coordenadas en formato DDMMSS.SSSSSSN DDDMMSS.SSSSSSW
-      const coordRegex = /(\d{2})(\d{2})(\d{2}\.\d{6})([NS])\s*(\d{3})(\d{2})(\d{2}\.\d{6})([EW])/;
-      const match = contenido.match(coordRegex);
-
-      if (match) {
-        // Extraer componentes
-        const latDeg = parseInt(match[1]);
-        const latMin = parseInt(match[2]);
-        const latSec = parseFloat(match[3]);
-        const latDir = match[4];
-
-        const lonDeg = parseInt(match[5]);
-        const lonMin = parseInt(match[6]);
-        const lonSec = parseFloat(match[7]);
-        const lonDir = match[8];
-
-        // Convertir a decimal
-        const lat = parseCoordToDecimal(latDeg, latMin, latSec, latDir);
-        const lon = parseCoordToDecimal(lonDeg, lonMin, lonSec, lonDir);
-
-        console.log(`soukronfpv - Coordenadas convertidas: ${lat}, ${lon}`);
-
-        try {
-          const elevation = await getElevation(lat, lon);
-          console.log(`soukronfpv - Elevación en el punto (${lat}, ${lon}): ${elevation} metros`);
-
-          // Mostrar las coordenadas originales y la elevación
-          valorDiv.innerHTML = `${contenido}<br>Elevación: ${elevation} metros`;
-        } catch (error) {
-          console.error('soukronfpv - Error al obtener la elevación:', error);
-          valorDiv.innerHTML = `${contenido}`;
-        }
-      } else {
-        console.log('soukronfpv - No se pudieron parsear las coordenadas:', contenido);
-        valorDiv.innerHTML = `${contenido}`;
-      }
-
-      return contenido;
-    }
-  }
-
-  return null;
-}
+// Variable global para almacenar la altura del ARP
+let arpHeight = null;
 
 // Función auxiliar para convertir coordenadas a decimal
 function parseCoordToDecimal(degrees, minutes, seconds, direction) {
@@ -369,25 +311,26 @@ async function processCoordinates() {
         const elevation = await getElevation(lat, lon);
         console.log(`soukronfpv - Elevación en el punto (${lat}, ${lon}): ${elevation} metros`);
 
-        // Actualizar el texto con coordenadas y elevación
+        // Actualizar el texto con coordenadas y elevación en líneas separadas
         const originalText = calcTimeDiv.textContent;
-        if (!originalText.includes('para las coordenadas')) {
-          calcTimeDiv.textContent = `${originalText} para las coordenadas ${contenido} (Elevación: ${elevation}m)`;
+        if (!originalText.includes('Coordenadas:')) {
+          calcTimeDiv.innerHTML = `${originalText}<br>Coordenadas: ${contenido}<br>Elevación: ${elevation} metros`;
         }
+
       } catch (error) {
         console.error('soukronfpv - Error al obtener la elevación:', error);
         // Si falla la elevación, mostrar solo las coordenadas
         const originalText = calcTimeDiv.textContent;
-        if (!originalText.includes('para las coordenadas')) {
-          calcTimeDiv.textContent = `${originalText} para las coordenadas ${contenido}`;
+        if (!originalText.includes('Coordenadas:')) {
+          calcTimeDiv.innerHTML = `${originalText}<br>Coordenadas: ${contenido}`;
         }
       }
     } else {
       console.log('soukronfpv - No se pudieron parsear las coordenadas:', contenido);
       // Si no se pueden parsear, mostrar las coordenadas tal cual
       const originalText = calcTimeDiv.textContent;
-      if (!originalText.includes('para las coordenadas')) {
-        calcTimeDiv.textContent = `${originalText} para las coordenadas ${contenido}`;
+      if (!originalText.includes('Coordenadas:')) {
+        calcTimeDiv.innerHTML = `${originalText}<br>Coordenadas: ${contenido}`;
       }
     }
   }
@@ -395,7 +338,15 @@ async function processCoordinates() {
 
 // Función para procesar el contenido de las alertas
 function processAlertContent(text) {
-  // Por ahora, solo agregamos un texto de ejemplo
+  // Expresión regular para capturar la altura en metros
+  const heightRegex = /Por debajo de (\d+)m medidos desde el punto de referencia del /;
+  const match = text.match(heightRegex);
+  
+  if (match) {
+    arpHeight = parseInt(match[1], 10);
+    console.log('soukronfpv - Altura ARP/HRP capturada:', arpHeight, 'metros');
+  }
+
   return "<b>ALERTA:</b>&nbsp;" + text + "<br><i>Alerta procesada por soukronfpv</i>";
 }
 
@@ -433,7 +384,7 @@ function addDetectedClass() {
   const alertElements = document.querySelectorAll("div.mensajeDrones.ALERTA");
   alertElements.forEach((element) => {
     if (!element.classList.contains("detected") && 
-        element.textContent.includes("Por debajo de 45m medidos desde el punto de referencia del aeródromo (ARP) no es necesario coordinar la operación")) {
+        element.textContent.includes("Por debajo de")) {
       element.classList.add("detected");
 
       // Obtener el texto del div
