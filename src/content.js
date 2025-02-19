@@ -4,6 +4,9 @@ let lastClickedCoordinates = null;
 // Variable global para almacenar la altura del ARP
 let arpHeight = null;
 
+// Variable global para almacenar los datos de aeropuertos
+let airportsData = null;
+
 // Función auxiliar para convertir coordenadas a decimal
 function parseCoordToDecimal(degrees, minutes, seconds, direction) {
   let decimal = degrees + (minutes / 60) + (seconds / 3600);
@@ -327,15 +330,72 @@ async function processCoordinates() {
   }
 }
 
+// Función para cargar los datos de aeropuertos
+async function loadAirportsData() {
+  try {
+    const response = await fetch(chrome.runtime.getURL('aip.json'));
+    airportsData = await response.json();
+    console.log('soukronfpv - Datos de aeropuertos cargados');
+  } catch (error) {
+    console.error('soukronfpv - Error cargando datos de aeropuertos:', error);
+  }
+}
+
 // Función para procesar el contenido de las alertas
-function processAlertContent(text) {
-  // Expresión regular para capturar la altura en metros
+async function processAlertContent(text) {
+  // Expresión regular para capturar la altura en metros y el aeródromo
   const heightRegex = /Por debajo de (\d+)m medidos desde el punto de referencia del /;
-  const match = text.match(heightRegex);
+  const airportRegex = /operacional de (?:<elem>)([A-Z]+)\s*(?:<.elem>)\s*,\s*([A-Z]+)/;
   
-  if (match) {
-    arpHeight = parseInt(match[1], 10);
-    console.log('soukronfpv - Altura ARP/HRP capturada:', arpHeight, 'metros');
+  // Primero limpiamos el texto de tags HTML para el log
+  const cleanText = text.replace(/<[^>]*>/g, '');
+  const heightMatch = text.match(heightRegex);
+  const airportMatch = text.match(airportRegex);
+  console.log('soukronfpv - Procesando alerta:', cleanText, heightMatch, airportMatch);
+
+  if (heightMatch && airportMatch) {
+    arpHeight = parseInt(heightMatch[1], 10);
+    const airportName = airportMatch[1];
+    const airportCode = airportMatch[2];
+    
+    console.log('soukronfpv - Datos capturados:', {
+      altura: arpHeight,
+      aeropuerto: airportName,
+      codigo: airportCode
+    });
+
+    // Buscar datos del aeropuerto en aip.json
+    if (!airportsData) {
+      await loadAirportsData();
+    }
+
+    const airportData = airportsData?.find(airport => airport.icaoCode === airportCode);
+    if (airportData) {
+      console.log('soukronfpv - Datos del aeropuerto encontrados:', airportData);
+      const arpElevation = airportData.elevation.value;
+      console.log('soukronfpv - Elevación del aeropuerto:', arpElevation);
+      // Si tenemos las coordenadas y su elevación, calculamos la altura máxima
+      if (lastClickedCoordinates) {
+        const calcTimeDiv = document.querySelector('.calcTime');
+        const elevationText = calcTimeDiv?.textContent.match(/Elevación: (\d+) metros/);
+        
+        if (elevationText) {
+          const groundElevation = parseInt(elevationText[1], 10);
+          const heightAboveARP = arpElevation + arpHeight;
+          const maxHeight = heightAboveARP - groundElevation;
+
+          return `${text}
+                  <b>Altura máxima sin coordinacion:</b> ${maxHeight <= 0 ? '<span style="color: #dc143c;">No está permitido el vuelo. Ver desglose.</span>' : `${maxHeight} metros sobre el punto de despegue`}<br>
+                  <b>Desglose:</b><br>
+                  - Elevación del terreno: ${groundElevation}m<br>
+                  - Elevación del ARP: ${arpElevation}m<br>
+                  - Altura máxima sobre el ARP: ${arpHeight}m<br>
+                  - Altura máxima sobre el nivel del mar: ${heightAboveARP}m`;
+        }
+      }
+    } else {
+      console.log('soukronfpv - No se encontraron datos para el aeropuerto:', airportCode);
+    }
   }
 
   return "<b>ALERTA:</b>&nbsp;" + text + "<br><i>Alerta procesada por soukronfpv</i>";
@@ -373,7 +433,7 @@ function addDetectedClass() {
 
   // Procesar Alertas
   const alertElements = document.querySelectorAll("div.mensajeDrones.ALERTA");
-  alertElements.forEach((element) => {
+  alertElements.forEach(async (element) => {
     if (!element.classList.contains("detected") && 
         element.textContent.includes("Por debajo de")) {
       element.classList.add("detected");
@@ -382,7 +442,7 @@ function addDetectedClass() {
       const originalText = element.innerHTML;
 
       // Procesar y actualizar el texto del div
-      const updatedText = processAlertContent(originalText);
+      const updatedText = await processAlertContent(originalText);
 
       // Actualizar el contenido del div
       element.innerHTML = updatedText;

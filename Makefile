@@ -23,7 +23,8 @@ EXTENSION_FILES := \
 	src/icons/*.png
 EXTENSION_FILES := \
     $(wildcard $(EXTENSION_FILES)) \
-	src/content.js
+	src/content.js \
+	src/aip.json
 CHROMIUM_FILES := $(patsubst src/%,chromium/%, $(EXTENSION_FILES))
 FIREFOX_FILES  := $(patsubst src/%,firefox/%,  $(EXTENSION_FILES))
 
