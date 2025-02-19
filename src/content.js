@@ -380,12 +380,22 @@ async function processAlertContent(text) {
         if (elevationText) {
           const groundElevation = parseInt(elevationText[1], 10);
           const heightAboveARP = arpElevation + arpHeight;
-          const maxHeight = heightAboveARP - groundElevation;
+          let maxHeight = heightAboveARP - groundElevation;
+          let heightMessage;
+
+          if (maxHeight <= 0) {
+            heightMessage = '<span style="color: #dc143c;">No está permitido el vuelo. Ver desglose.</span>';
+          } else {
+            if (maxHeight > 120) {
+              maxHeight = 120;
+            }
+            heightMessage = `${maxHeight}m sobre el punto de despegue`;
+          }
 
           return `${text}
-                  <b>Altura máxima sin coordinacion:</b> ${maxHeight <= 0 ? '<span style="color: #dc143c;">No está permitido el vuelo. Ver desglose.</span>' : `${maxHeight} metros sobre el punto de despegue`}<br>
+                  <b>Altura máxima sin coordinacion:</b> ${heightMessage}<br>
                   <b>Desglose:</b><br>
-                  - Elevación del terreno: ${groundElevation}m<br>
+                  - Elevación del punto de despegue: ${groundElevation}m<br>
                   - Elevación del ARP: ${arpElevation}m<br>
                   - Altura máxima sobre el ARP: ${arpHeight}m<br>
                   - Altura máxima sobre el nivel del mar: ${heightAboveARP}m`;
