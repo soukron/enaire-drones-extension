@@ -6,13 +6,23 @@
   "description": "Extensión NO OFICIAL para simplificar la lectura en drones.enaire.es.",
   "homepage_url": "https://github.com/soukron/enaire-drones-extension",
   "permissions": [
+    "webRequest",
+    "webRequestBlocking",
+    "webNavigation",
+    "https://drones.enaire.es/*",
     "https://api.open-elevation.com/*"
   ],
   "content_scripts": [
     {
       "matches": ["https://drones.enaire.es/*"],
-      "js": ["content.js"]
+      "js": ["content-loader.js"]
     }
+  ],
+  "web_accessible_resources": [
+    "modules/*.js",
+    "modules/ui/*.js",
+    "modules/utils/*.js",
+    "aip.json"
   ],
   "browser_action": {
     "default_icon": {

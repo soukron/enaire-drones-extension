@@ -7,14 +7,25 @@
   "homepage_url": "https://github.com/soukron/enaire-drones-extension",
   "permissions": [],
   "host_permissions": [
-    "https://api.open-elevation.com/*"
+    "https://api.open-elevation.com/*",
+    "https://drones.enaire.es/*"
   ],
   "content_scripts": [
     {
       "matches": ["https://drones.enaire.es/*"],
-      "js": ["content.js"]
+      "js": ["content.js"],
+      "type": "module"
     }
   ],
+  "web_accessible_resources": [{
+    "resources": [
+      "modules/*.js",
+      "modules/ui/*.js",
+      "modules/utils/*.js",
+      "aip.json"
+    ],
+    "matches": ["https://drones.enaire.es/*"]
+  }],
   "action": {
     "default_icon": {
       "16": "icons/icon-16.png",
